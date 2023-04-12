@@ -7,9 +7,16 @@ jobs:
     steps:
       - name : Check out repository code
         uses : actions/checkout@v3
+      # Update/Create artifact
       - name: Archive production artifacts
         uses: actions/upload-artifact@v3
         with:
           name: astro-docu
           path: ${{ github.workspace }}/_artifact/pages
+          retention-days: 20
+      # Download artifact
+      - name : Download a single artifact
+        uses : actions/download-artifact@v3
+        with :
+          name : astro-docu
 
