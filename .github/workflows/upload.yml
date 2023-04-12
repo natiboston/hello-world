@@ -13,4 +13,4 @@ jobs:
       - name : List files for the artifact
         run : |
           echo workspace: $${{ github.workspace }} 
-          ls ${{ github.workspace }}    
+          ls -lsr ${{ github.workspace }}./artifact    
