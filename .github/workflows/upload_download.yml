@@ -1,0 +1,44 @@
+name: Upload 1
+run-name: ${{ github.actor }} is testing UPDATE artifact with GitHub Actions
+on: [push]
+
+jobs:
+  build-artifact:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      # Update/Create artifact
+      - name: Build artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: astro-docu
+          path: ${{ github.workspace }}/_artifact/pages
+          retention-days: 20
+
+  release-artifact:
+    runs-on : ubuntu-latest
+    needs: build-artifact
+    steps:
+      - name: Release artifact
+        uses: actions/download-artifact@v3
+        with:
+          name : astro-docu
+          #path in case change the output
+          path: output
+
+      - name: Check files
+        run: ls -R  output
+
+
+  download-zip:
+    runs-on: ubuntu-latest
+    needs:   release-artifact
+    steps:
+      - name: Check files
+        run: curl --location --request GET 'https://api.github.com/repos/natiboston/hello-world/actions/artifacts/643560604' \
+--header 'Accept: application/vnd.github+json' \
+--header 'X-GitHub-Api-Version: 2022-11-28' \
+--header 'Cookie: _octo=GH1.1.128020517.1681303272; logged_in=no' \
+  --data-raw ''
+
