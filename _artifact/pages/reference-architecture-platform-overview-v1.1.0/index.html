@@ -1,0 +1,659 @@
+<p><img src="./media/55a7362d3b775f49d546115a244135d9.jpg"
+style="width:4.72996in;height:6.3055in" /><img
+src="./media/27b819ac5f7663903aab6106e02815dd.png"
+style="width:0.24921in;height:0.27042in" /></p>
+<p><a href="#introduction"><strong>Introduction 4</strong></a></p>
+<p><a href="#_aer1phlcbfb3"><strong>Integrations 5</strong></a></p>
+<p><a href="#l1-blockchain-network"><strong>L1: Blockchain network
+6</strong></a></p>
+<blockquote>
+<p><a href="#logical-overview">Logical overview 6</a></p>
+<p><a href="#physical-overview">Physical overview 6</a></p>
+<p><a href="#security-aspects">Security aspects 7</a></p>
+<p><a href="#monitoring-and-logging">Monitoring and Logging 7</a></p>
+<p><a href="#upgrades">Upgrades 7</a></p>
+</blockquote>
+<p><a
+href="#l2-application-enabling-layer-eth-gw-eth-signer"><strong>L2:
+Application enabling layer (eth-gw + eth-signer) 7</strong></a></p>
+<blockquote>
+<p><a href="#logical-overview-1">Logical overview 7</a></p>
+<p><a href="#physical-overview-1">Physical overview 9</a></p>
+<p><a href="#security-aspects-1">Security aspects 9</a></p>
+<p><a href="#monitoring-and-logging-1">Monitoring and logging 9</a></p>
+<p><a href="#upgrades-1">Upgrades 9</a></p>
+</blockquote>
+<p><a
+href="#l2-application-enabling-layer-peer-to-peer-messaging---p2p"><strong>L2:
+Application enabling layer (peer to peer messaging - p2p)
+10</strong></a></p>
+<blockquote>
+<p><a href="#logical-overview-2">Logical overview 10</a></p>
+<p><a href="#physical-overview-2">Physical overview 12</a></p>
+<p><a href="#security-aspects-2">Security aspects 13</a></p>
+<p><a href="#monitoring-and-logging-2">Monitoring and logging 13</a></p>
+</blockquote>
+<p><a
+href="#l3-application-layer-smart-contracts-off-chain-components"><strong>L3:
+Application layer (smart-contracts + off-chain components)
+13</strong></a></p>
+<blockquote>
+<p><a href="#logical-overview-3">Logical overview 13</a></p>
+<p><a href="#physical-overview-3">Physical overview 15</a></p>
+<p><a href="#security-aspects-3">Security aspects 15</a></p>
+<p><a href="#monitoring-and-logging-3">Monitoring and logging 15</a></p>
+<p><a href="#upgrades-2">Upgrades 15</a></p>
+</blockquote>
+<p><a href="#annex-1-l1-l2-k8s-cluster"><strong>Annex 1: L1 + L2 K8s
+cluster 16</strong></a></p>
+<p><a href="#annex-2-end-to-end-security"><strong>Annex 2: End to End
+Security 16</strong></a></p>
+<blockquote>
+<p><a href="#backend-authentication">Backend Authentication 16</a></p>
+<p><a href="#smart-contracts-authentication">Smart Contracts
+Authentication 17</a></p>
+<p><a href="#backend-authorization">Backend Authorization 17</a></p>
+<p><a href="#smart-contracts-authorization">Smart Contracts
+Authorization 19</a></p>
+<p><a href="#frontend-permissioning"><strong>Frontend Permissioning
+19</strong></a></p>
+<p><a href="#inter-component-secure-communication"><strong>Inter
+Component Secure Communication 20</strong></a></p>
+<p><a href="#http-communication">HTTP communication 20</a></p>
+<p><a href="#other-protocols">Other protocols 21</a></p>
+<p><a href="#annex-4-secrets-management"><strong>Annex 4: Secrets
+Management 21</strong></a></p>
+<p><a href="#user-password">User &amp; Password 21</a></p>
+<p><a href="#private-keys">Private Keys 21</a></p>
+</blockquote>
+<p><a href="#annex-3-data"><strong>Annex 3: Data 22</strong></a></p>
+<blockquote>
+<p><a href="#data-at-rest">Data at rest 22</a></p>
+<p><a href="#smart-contracts">Smart Contracts 22</a></p>
+<p><a href="#eth-gateway-database">Eth Gateway Database 22</a></p>
+<p><a href="#backend-database">Backend Database 22</a></p>
+<p><a href="#queues">Queues 22</a></p>
+<p><a href="#data-in-transit">Data in transit 22</a></p>
+<p><a href="#eth-rpc">Eth RPC 23</a></p>
+<p><a href="#p2p-channels">P2P Channels 23</a></p>
+<p><a href="#https-endpoints-inter-component-communication">HTTPs
+endpoints (inter-component communication) 23</a></p>
+<p><a href="#eth-peer-to-peer-protocol">Eth Peer to Peer Protocol
+23</a></p>
+<p><a href="#database-connection">Database connection 23</a></p>
+<p><a href="#queue-connection">Queue Connection 23</a></p>
+</blockquote>
+<h1 id="section"><br />
+</h1>
+<h1 id="introduction">Introduction</h1>
+<p>This document describes the deployment of an Adhara Stack. It does
+not provide deployment instructions, only description.</p>
+<p>The Adhara stack comprises three layers as in the diagram below:</p>
+<ol type="1">
+<li><blockquote>
+<p>Blockchain network</p>
+</blockquote></li>
+<li><blockquote>
+<p>Application enablement</p>
+</blockquote></li>
+<li><blockquote>
+<p>Business application</p>
+</blockquote></li>
+</ol>
+<p><img src="./media/71cfe5cd1f920ce726381530d99901a0.png"
+style="width:2.18625in;height:1.42106in" /></p>
+<p>For each layer, a <strong>logical overview</strong> and
+<strong>physical overview</strong> are provided and the cross-cutting
+concerns of security, observability and upgrading are discussed.</p>
+<p>Since the blockchain-based system is decentralized, the application
+layers are intended to be deployed on local infrastructures owned by
+participants, i.e. separate than that of the Blockchain Network
+layer.</p>
+<p>The deployment model is agnostic to any infrastructure provider,
+relying solely on Kubernetes. This enables the Adhara stack to be
+reliably deployed on AWS/EKS, Azure/AKS, on premise kubernetes solution
+or even localhost/MiniKube for lab deployments.</p>
+<p>However, Infrastructure tweeks are still required, for example in
+choosing the correct VM type depending on the component, or ensuring
+that validators nodes are run on separate VMs.</p>
+<p>GitOps practices are recommended to best manage infrastructure and
+deployments</p>
+<p>Logging &amp; monitoring infrastructure is decoupled to ensure
+observability during operational issues</p>
+<h1 id="integrations"><br />
+Integrations</h1>
+<p>The Adhara Stack is designed for easy integration with existing
+systems offering RESTFul endpoints to perform operations and request
+data.</p>
+<p>The Adhara Stack also offers real time notification and information
+delivery for existing applications based on configuration through HTTP
+webhooks approach and queue events.</p>
+<p>The following diagram summarizes the different kinds of integrations
+supported by the stack.</p>
+<p><img src="./media/e4c07da7b12e119481fb8dc63d78cedf.png"
+style="width:5.3125in;height:2.75in" /></p>
+<h1 id="section-1"><br />
+</h1>
+<h1 id="l1-blockchain-network">L1: Blockchain network</h1>
+<h2 id="logical-overview">Logical overview</h2>
+<p>In a Private Ethereum network we have 3 types of nodes:</p>
+<ul>
+<li><blockquote>
+<p><strong>Validators</strong>: verify transactions and generate new
+blocks</p>
+</blockquote></li>
+<li><blockquote>
+<p><strong>Permissioners</strong>: act as security intermediaries
+between ethereum clients and validators</p>
+</blockquote></li>
+<li><blockquote>
+<p><strong>Clients</strong>: used by participants to query the
+blockchain data and submit transactions.</p>
+</blockquote></li>
+</ul>
+<p><img src="./media/2ca91c622dfd3c518055820149f82a59.png"
+style="width:6.77256in;height:2.94271in" /></p>
+<h2 id="physical-overview">Physical overview</h2>
+<p><img src="./media/b1f12846473716ca2a7794a3a6064733.png"
+style="width:6.625in;height:2.69444in" /></p>
+<ul>
+<li><blockquote>
+<p>Besu nodes are deployed as stateful sets</p>
+</blockquote></li>
+<li><blockquote>
+<p>Ingress layer handles incoming traffic to the cluster</p>
+</blockquote></li>
+<li><blockquote>
+<p>A dedicated node is deployed to perform backups with the desired
+frequency. Booting a new node by restoring a backup blockchain state is
+significantly faster than syncing with peer nodes.</p>
+</blockquote></li>
+</ul>
+<h2 id="security-aspects">Security aspects</h2>
+<ul>
+<li><blockquote>
+<p>Node keys are ingested from an external secrets vault system without
+human operator intervention.</p>
+</blockquote></li>
+<li><blockquote>
+<p>Ingress layer can filter incoming traffic and implement Mutual TLS if
+desired</p>
+</blockquote></li>
+<li><blockquote>
+<p>Permissioners read from a smart contract the list of client nodes
+allowed to join the network.</p>
+</blockquote></li>
+</ul>
+<h2 id="monitoring-and-logging">Monitoring and Logging</h2>
+<p>Besu nodes export metrics in Prometheus format.</p>
+<h2 id="upgrades">Upgrades</h2>
+<p>Besu node upgrades must follow the Besu documentation. Normally,
+unless major breaking changes, this procedure is only a Docker image
+version bump. Aspects to consider are:</p>
+<ul>
+<li><blockquote>
+<p>Genesis file cannot be modified (only certain fields)</p>
+</blockquote></li>
+<li><blockquote>
+<p>Validator node upgrades need to be coordinated to avoid consensus
+loss</p>
+</blockquote></li>
+</ul>
+<h1 id="l2-application-enabling-layer-eth-gw-eth-signer">L2: Application
+enabling layer (eth-gw + eth-signer)</h1>
+<h2 id="logical-overview-1">Logical overview</h2>
+<p>Two of the main components for the enabling layer are:</p>
+<ul>
+<li><blockquote>
+<p><strong>Eth-Gateway</strong>: facilitates the usage of the network by
+providing Ethereum smart contract functions as an easy-to-consume REST
+API. It can also send webhook notifications on smart contracts events.
+Multiple applications can use the same eth-gw with different
+configurations to interact with blockchain networks.</p>
+</blockquote></li>
+<li><blockquote>
+<p><strong>Eth-Signer</strong>: adapter to different transaction signing
+solutions (like HSM)</p>
+</blockquote></li>
+</ul>
+<p>Requirements are:</p>
+<ul>
+<li><blockquote>
+<p>A compatible database</p>
+</blockquote></li>
+<li><blockquote>
+<p>HSM or keystore storage</p>
+</blockquote></li>
+<li><blockquote>
+<p><strong>Ethereum client (L1)</strong>: used to query the blockchain
+data and submit transactions. It's connected to remote permissioners</p>
+</blockquote></li>
+</ul>
+<p><img src="./media/33551bfc10598a26603d812a5b0ece2d.png"
+style="width:6.625in;height:4.88889in" /><a
+href="https://app.diagrams.net/#G1bxZkAHlJEXTG6wnA3zdGB9Pke_KyC4Yq"><img
+src="./media/8765bf1d6ab2d5ce2c696b77f40a4e86.png"
+style="width:6.625in;height:3.16667in" /></a></p>
+<p>EthGateway</p>
+<p>Option 1: EthClient in Client Datacenter</p>
+<p>Option 2: EthClient in Blockchain Network only</p>
+<h2 id="physical-overview-1">Physical overview</h2>
+<p><img src="./media/8d2cbf27fcd6036c3b781a89001015f7.png"
+style="width:6.625in;height:4.25in" /></p>
+<ul>
+<li><blockquote>
+<p>Eth-Gateway and Eth-Signer are deployed as Kubernetes services. Eht
+Gateway is deployed as stateful for cluster mode (providing HA)</p>
+</blockquote></li>
+<li><blockquote>
+<p>Ethereum clients deployment is analogous to the validator and
+permissioner deployments seen in <a href="#_hr1ytjf928y8"><u>L1:
+Blockchain network</u></a></p>
+</blockquote></li>
+</ul>
+<h2 id="security-aspects-1">Security aspects</h2>
+<ul>
+<li><blockquote>
+<p>Communication between all components can be protected with Mutual
+TLS</p>
+</blockquote></li>
+<li><blockquote>
+<p>Ingress layer authenticates incoming traffic using an external
+identity server (OIDC provider)</p>
+</blockquote></li>
+<li><blockquote>
+<p>Ethereum clients must be whitelisted by the remote permissioners.</p>
+</blockquote></li>
+</ul>
+<h2 id="monitoring-and-logging-1">Monitoring and logging</h2>
+<p>Eth Gateway and EthSigner expose Prometheus metrics. Eth-Gateway
+writes logs in JSON format, including an access log of all the http
+requests it receives.</p>
+<h2 id="upgrades-1">Upgrades</h2>
+<p>Eth-Signer upgrades are performed according to the product
+documentation. Normally, unless major breaking changes, this procedure
+is only a Docker image version bump.</p>
+<p>Eth-Gateway provides a built in "upgrade" subcommand that
+automatically executes the needed tasks to perform the upgrade on the
+database. Before invoking it, all instances of the Eth-Gateway cluster
+must be stopped, and then restarted after the "upgrade" utility has been
+applied.</p>
+<h1 id="l2-application-enabling-layer-peer-to-peer-messaging---p2p">L2:
+Application enabling layer (peer to peer messaging - p2p)</h1>
+<h2 id="logical-overview-2">Logical overview</h2>
+<p>P2P messages provide end to end encrypted messaging to interchange
+sensible information between parties. It support pluggable protocols
+(not described in this document)</p>
+<ul>
+<li><blockquote>
+<p><strong>P2P Node</strong>: Provides encrypted communication with
+other entities connected with the network after configuring a secure
+channel between them.</p>
+</blockquote></li>
+</ul>
+<p>Requirements are:</p>
+<ul>
+<li><blockquote>
+<p>A compatible database</p>
+</blockquote></li>
+<li><blockquote>
+<p>HSM or keystore storage</p>
+</blockquote></li>
+<li><blockquote>
+<p>Connectivity to a P2P network</p>
+</blockquote></li>
+</ul>
+<p><img src="./media/6e7d7a64afff906449029b9298aa56ed.png"
+style="width:6.625in;height:5.58333in" /></p>
+<p><img src="./media/27c8887dc7fbb84ae342ab291e82a402.png"
+style="width:6.625in;height:3.81944in" /></p>
+<h2 id="physical-overview-2">Physical overview</h2>
+<p><span class="image placeholder"
+data-original-image-src="media/image5.png" data-original-image-title=""
+width="6.625in" height="4.25in"></span></p>
+<ul>
+<li><blockquote>
+<p>P2P nodes are deployed as stateful sets</p>
+</blockquote></li>
+<li><blockquote>
+<p>Ethereum clients deployment is analogous to the validator and
+permissioner deployments seen in <a href="#_hr1ytjf928y8"><u>L1:
+Blockchain network</u></a></p>
+</blockquote></li>
+</ul>
+<h2 id="security-aspects-2">Security aspects</h2>
+<ul>
+<li><blockquote>
+<p>Communication between all components can be protected with Mutual
+TLS</p>
+</blockquote></li>
+</ul>
+<h2 id="monitoring-and-logging-2">Monitoring and logging</h2>
+<p>P2P nodes expose Prometheus metrics. Every P2P node writes logs in
+JSON format easy to aggregate and parse</p>
+<h1 id="l3-application-layer-smart-contracts-off-chain-components">L3:
+Application layer (smart-contracts + off-chain components)</h1>
+<h2 id="logical-overview-3">Logical overview</h2>
+<p>The adhara application layer is composed by:</p>
+<ul>
+<li><blockquote>
+<p><strong>Backend</strong>: implements basic business logic to allow
+interaction with Ethereum smart contracts. Examples: DC Commander, DC
+Operate, DC Issuer, DC Corporate, …</p>
+</blockquote></li>
+<li><blockquote>
+<p><strong>Frontend</strong>: GUI interface for users</p>
+</blockquote></li>
+</ul>
+<p>Architecture requirements are:</p>
+<ul>
+<li><blockquote>
+<p>Authentication gateway: intercepts incoming requests and performs
+authentication.</p>
+</blockquote></li>
+<li><blockquote>
+<p>Postgres database</p>
+</blockquote></li>
+<li><blockquote>
+<p>Queue system (activemq or rabbit mq)</p>
+</blockquote></li>
+</ul>
+<p><img src="./media/e27f5ff0238e3d9b6440914c64d0b513.png"
+style="width:6.625in;height:5.59722in" /></p>
+<h2 id="physical-overview-3">Physical overview</h2>
+<p><img src="./media/0bb548d67a3de659225a93b6dc6d7d80.png"
+style="width:6.625in;height:3.80556in" /></p>
+<ul>
+<li><blockquote>
+<p>Adhara Platform and Backend are deployed as K8s deployments</p>
+</blockquote></li>
+</ul>
+<h2 id="security-aspects-3">Security aspects</h2>
+<ul>
+<li><blockquote>
+<p>Ingress layer is the Authentication Gateway: authenticates incoming
+traffic using an external identity server (OIDC provider)</p>
+</blockquote></li>
+<li><blockquote>
+<p>Communication between all components can be protected with Mutual
+TLS</p>
+</blockquote></li>
+<li><blockquote>
+<p>Kubernetes network policies can be implemented to restrict the
+network access to specific pods or namespaces</p>
+</blockquote></li>
+</ul>
+<h2 id="monitoring-and-logging-3">Monitoring and logging</h2>
+<ul>
+<li><blockquote>
+<p>Adhara Backend writes logs in JSON format, including an access log of
+all the http requests it receives.</p>
+</blockquote></li>
+</ul>
+<h2 id="upgrades-2">Upgrades</h2>
+<p>Both Backend and Frontend are upgraded by bumping the version number
+of their Docker tag. Backend provides an "upgrade" subcommand in its
+executable distribution that automatically makes the modifications to
+the DB data when that's needed. This process is idempotent and can be
+easily executed automatically as part of the upgrade.</p>
+<p>Upgrading smart-contracts</p>
+<h1 id="section-2"></h1>
+<h1 id="annex-1-l1-l2-k8s-cluster">Annex 1: L1 + L2 K8s cluster</h1>
+<p>This diagram describes a deployment topology for an initial setup of
+a Kubernetes cluster containing:</p>
+<ul>
+<li><blockquote>
+<p>L1 permissioners and validators</p>
+</blockquote></li>
+<li><blockquote>
+<p>L2 eth-gateway instance for network administrators</p>
+</blockquote></li>
+</ul>
+<p><span class="image placeholder"
+data-original-image-src="media/image11.png" data-original-image-title=""
+width="6.625in" height="2.6944444444444446in"></span></p>
+<h1 id="annex-2-end-to-end-security">Annex 2: End to End Security</h1>
+<p>Adhara stack doesn’t provide an Authentication layer but supports
+integration with existing Authentication mechanisms already
+available.</p>
+<p>The Security Gateway shown in the following diagrams represents any
+security layer providing Authentication (service, commercial or
+custom).</p>
+<h3 id="backend-authentication">Backend Authentication</h3>
+<p>Adhara backends will always rely on external authentication
+systems.</p>
+<p><strong>External Delegated Authentication</strong> to support
+integration with clients prefered internal auth systems.</p>
+<p><strong>Authentication filter</strong> provides an
+<strong>extensible</strong> way to collect user and application
+information to contextualize requests</p>
+<p><img src="./media/a3733e4cc72b7f9ab12584451fd0a96b.png"
+style="width:6.625in;height:3.69444in" /></p>
+<h3 id="smart-contracts-authentication">Smart Contracts
+Authentication</h3>
+<p>Smart contracts authentication for transaction execution will rely on
+the built in standard of the blockchain technology used for that smart
+contract. The most common approach will use the public address of the
+sender that must match with the private key used to sign the transaction
+to be performed in the smart contract.</p>
+<p>By definition all information stored in the BC network is public so
+authentication is not required*</p>
+<p>* Privacy solutions not considered</p>
+<h3 id="backend-authorization">Backend Authorization </h3>
+<p>Role Based Access Control (RBAC) is mandatory in all Adhara
+Backends.</p>
+<p>The role based access model is represented in the following
+diagram</p>
+<p><img src="./media/a446decaa6a39e0a3317ad4ebd982b05.png"
+style="width:6.01042in;height:1.35417in" /></p>
+<ul>
+<li><blockquote>
+<p><strong>User:</strong> actor performing an interaction with the
+system (it can represent an application or a person). A user can have
+many roles at the same time.</p>
+</blockquote></li>
+<li><blockquote>
+<p><strong>Role:</strong> Group of permissions that can be assigned to a
+user.</p>
+</blockquote></li>
+<li><blockquote>
+<p><strong>Permission:</strong> Represent an action over a resource
+(Example transfer from account XYZ)</p>
+</blockquote></li>
+<li><blockquote>
+<p><strong>Action:</strong> Named operation over a resource in the
+system</p>
+</blockquote></li>
+<li><blockquote>
+<p><strong>Resource:</strong> Entity in the system (an account, a user,
+…)</p>
+</blockquote></li>
+</ul>
+<p><strong>RBAC Authorization</strong> system is based on a simplified
+XACML ABAC system:</p>
+<ul>
+<li><blockquote>
+<p><strong>PEP:</strong> Policy enforcement point. Intercepts all calls
+and acts as a proxy to the backend logic. Orchestrate the calls to PIP
+and PDP before sending the request to backend logic</p>
+</blockquote></li>
+</ul>
+<ul>
+<li><blockquote>
+<p><strong>PDP:</strong> Policy decision point gets needed information
+using PIPs to decide if the request can be performed or not</p>
+</blockquote></li>
+</ul>
+<ul>
+<li><blockquote>
+<p><strong>PIP:</strong> Policy information point. Get information
+needed to decide if the request can be performed or not</p>
+</blockquote></li>
+</ul>
+<p><img src="./media/cf05b0c2c8fa53440cbdd636730b533c.png"
+style="width:6.41667in;height:3.25in" /></p>
+<h3 id="smart-contracts-authorization">Smart Contracts
+Authorization</h3>
+<p>Smart contracts are protected with <strong>Adhara RBAC smart
+contract</strong> in combination with an <strong>Adhara security
+validation library</strong> that provides convenient utilities to
+enforce security checks following the “require” assertion model from
+solidity language.</p>
+<p>Adhara RBAC provides a <strong>powerful fine grained permission
+model</strong> while Adhara Smart contracts provide higher permissioning
+functions covering the typical and recommended uses cases and roles</p>
+<p>The role based access model is represented in the following
+diagram</p>
+<p><span class="image placeholder"
+data-original-image-src="media/image1.png" data-original-image-title=""
+width="6.010416666666667in" height="1.3541666666666667in"></span></p>
+<ul>
+<li><blockquote>
+<p><strong>User:</strong> actor performing an interaction with the
+system (it can represent an application or a person). A user can have
+many roles at the same time.</p>
+</blockquote></li>
+<li><blockquote>
+<p><strong>Role:</strong> Group of permissions that can be assigned to a
+user.</p>
+</blockquote></li>
+<li><blockquote>
+<p><strong>Permission:</strong> Represent an action over a resource
+(Example transfer from account XYZ)</p>
+</blockquote></li>
+<li><blockquote>
+<p><strong>Action:</strong> Named operation over a resource in the
+system</p>
+</blockquote></li>
+<li><blockquote>
+<p><strong>Resource:</strong> Entity in the system (an account, a user,
+…)</p>
+</blockquote></li>
+</ul>
+<h3 id="frontend-permissioning">Frontend Permissioning</h3>
+<p>Single page application with partial server rendering.</p>
+<p>Frontend applications rely on the Adhara <strong>UI component
+library</strong> (like tabs, buttons, column of a table, …). Components
+are combined to build screens using a <strong>hierarchical composition
+model</strong> where some container components offer permission
+control.</p>
+<p>Permission control improves usability offering dynamically allowed
+actions and information according to the role of the user interacting
+with the application. Permission control is driven by allowed actions
+returned by the backend.</p>
+<p><img src="./media/968b410a8c0b347209b74981c8f95e8f.png"
+style="width:5in;height:5.35417in" /></p>
+<h3 id="inter-component-secure-communication">Inter Component Secure
+Communication</h3>
+<h3 id="http-communication">HTTP communication</h3>
+<p>Adhara components don’t support starting or ending TLS secure
+connections. The recommended approach to support tls is to add sidecar
+proxies.</p>
+<p>Sidecar proxies is a widely adopted pattern in cloud environments. A
+good article from Microsoft <a
+href="https://docs.microsoft.com/en-us/azure/architecture/patterns/sidecar"><u>https://docs.microsoft.com/en-us/azure/architecture/patterns/sidecar</u></a></p>
+<p>Next diagram represents the general approach to protect inbound and
+outbound communications using tls (or mutual tls)</p>
+<p><img src="./media/0796bc168f369fa1a2fc271017a7e7d3.png"
+style="width:6.5in;height:2.30556in" /></p>
+<h3 id="other-protocols">Other protocols</h3>
+<p>When non standard http security is available (ex: built in security
+connections for queue systems or databases) Adhara components will
+support those protocols to enable secure connections with third party
+supported elements.</p>
+<h2 id="annex-4-secrets-management">Annex 4: Secrets Management</h2>
+<p><strong>Applications will never store passwords as plain
+text</strong> in non secure secrets storages like databases</p>
+<p><strong>Applications can read passwords from config files</strong>.
+Config files must be securely managed (ex: stored in secure secrets
+manager stored)</p>
+<h3 id="user-password">User &amp; Password</h3>
+<p>Users and passwords must be stored in secure stores. Deployment
+orchestrator will be authorized to access the secure stores and inject
+secrets configuration to Adhara applications.</p>
+<h3 id="private-keys">Private Keys</h3>
+<p><strong>HSMs is the preferred method to manage private keys and sign
+messages/transactions.</strong></p>
+<p>Local signing (and local private key store) is highly unrecommended
+but can be used for non production and demo environments.</p>
+<h1 id="annex-3-data">Annex 3: Data</h1>
+<h2 id="data-at-rest">Data at rest</h2>
+<ul>
+<li><blockquote>
+<p>Smart Contracts</p>
+</blockquote></li>
+<li><blockquote>
+<p>Eth Gateway Database</p>
+</blockquote></li>
+<li><blockquote>
+<p>Backend Database (DC Commander, DC Operate, …)</p>
+</blockquote></li>
+<li><blockquote>
+<p>Queues (Depending on the selected kind of queue)</p>
+</blockquote></li>
+</ul>
+<h3 id="smart-contracts">Smart Contracts</h3>
+<p>All the information stored in Smart Contracts is not sensitive</p>
+<h3 id="eth-gateway-database">Eth Gateway Database</h3>
+<p>Stores the state of the transactions sent to the blockchain network
+and the events obtained from the same network-s. The information stored
+in the Eth Gateway database is aligned with the information provided or
+obtained from the smart contracts configured. As Adhara Smart Contracts
+don’t store sensitive data, Eth Gateway database will never store
+sensitive information.</p>
+<h3 id="backend-database">Backend Database</h3>
+<p>Stores sensitive information so it must be encrypted aligned with the
+regulations of the jurisdiction where the backend will be
+instantiated</p>
+<h3 id="queues">Queues</h3>
+<p>Messages produced by Adhara backends will never contain sensitive
+information. Messages coming from Eth Gateway as part of events produced
+by Adhara smart contracts will never contain sensitive information.</p>
+<h2 id="data-in-transit">Data in transit</h2>
+<ul>
+<li><blockquote>
+<p>Eth RPC</p>
+</blockquote></li>
+<li><blockquote>
+<p>Private Channels</p>
+</blockquote></li>
+<li><blockquote>
+<p>HTTPs endpoints (inter-component communication)</p>
+</blockquote></li>
+<li><blockquote>
+<p>Eth Peer to Peer Protocol</p>
+</blockquote></li>
+<li><blockquote>
+<p>Database connection</p>
+</blockquote></li>
+<li><blockquote>
+<p>Queue connection</p>
+</blockquote></li>
+</ul>
+<h3 id="eth-rpc">Eth RPC</h3>
+<p>Ethereum JSON RPC API calls don't contain sensitive data, as they are
+the interaction with the blockchain layer. It is built on top of HTTP,
+so usual security measures applied to HTTP can be applied to this
+communication.</p>
+<h3 id="p2p-channels">P2P Channels</h3>
+<p>P2P Channels might contain sensitive data. This connection uses the
+peer-to-peer <a href="https://libp2p.io/"><u>LibP2P</u></a> protocol as
+a transport layer over TCP, which is encrypted by default.</p>
+<h3 id="https-endpoints-inter-component-communication">HTTPs endpoints
+(inter-component communication)</h3>
+<p>Communications from UI to backend as well as users' browsers might
+contain sensitive data. Usual measures can be applied to this layer as
+well: TLS, Oauth2, etc.</p>
+<h3 id="eth-peer-to-peer-protocol">Eth Peer to Peer Protocol</h3>
+<p>Blockchain (Ethereum) nodes use DevP2P to interact with each other.
+This is a peer-to-peer encrypted protocol, although no sensitive
+information is ever written/submitted in/to the blockchain nodes.</p>
+<h3 id="database-connection">Database connection</h3>
+<p>Backend and EthGateway use SQL databases as persistence mechanisms.
+In the case of the backend the data sent to its database can be
+sensitive and must be protected with the mechanisms supported by the
+specific chosen database solution.</p>
+<h3 id="queue-connection">Queue Connection</h3>
+<p>Backend uses a queue to handle asynchronous processing. Some of the
+information over this wire can be sensitive and must be protected with
+the mechanisms provided by the chosen Queue solution.</p>
