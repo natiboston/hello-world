@@ -27,4 +27,4 @@ jobs:
           path: output
 
       - name : Check files
-        run: ls -R
+        run: ls -R  output
