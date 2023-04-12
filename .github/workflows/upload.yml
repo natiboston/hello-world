@@ -9,5 +9,5 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: astro-docu
-          path: ${{ github.workspace }}/_artifact
+          path: ${{ github.workspace }}/_artifact/pages
 
