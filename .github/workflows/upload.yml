@@ -1,0 +1,13 @@
+name: Update 1
+run-name: ${{ github.actor }} is testing UPDATE artifact with GitHub Actions
+on: [push]
+jobs:
+  build_and_test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Archive production artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: astro-docu
+          path: /home/natalia/github.com/workspace/hello-world/_artifact/*
+
