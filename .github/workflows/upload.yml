@@ -1,4 +1,4 @@
-name: Update 1
+name: Upload 1
 run-name: ${{ github.actor }} is testing UPDATE artifact with GitHub Actions
 on: [push]
 jobs:
