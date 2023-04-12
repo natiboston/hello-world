@@ -9,8 +9,5 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: astro-docu
-          path: ${{ github.workspace }}/_artifact/*
-      #- name : List files for the artifact
-      #  run : |
-      #    echo workspace: ${{ github.workspace }}
-      #    ls ${{ github.workspace }}
+          path: ${{ github.workspace }}/_artifact
+
