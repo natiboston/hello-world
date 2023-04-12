@@ -6,8 +6,8 @@ jobs:
   build-artifact:
     runs-on: ubuntu-latest
     steps:
-      - name : Check out repository code
-        uses : actions/checkout@v3
+      - name: Check out repository code
+        uses: actions/checkout@v3
       # Update/Create artifact
       - name: Build artifact
         uses: actions/upload-artifact@v3
@@ -19,13 +19,22 @@ jobs:
   release-artifact:
     runs-on : ubuntu-latest
     needs: build-artifact
-    steps :
-      - name : Download artifact
-        uses : actions/download-artifact@v3
-        with :
+    steps:
+      - name: Release artifact
+        uses: actions/download-artifact@v3
+        with:
           name : astro-docu
           #path in case change the output
           path: output
 
-      - name : Check files
+      - name: Check files
         run: ls -R  output
+
+
+  download-zip:
+    runs-on: ubuntu-latest
+    needs:   release-artifact
+    steps:
+      - name: Check files
+        run: wget "https://api.github.com/repos/natiboston/hello-world/actions/artifacts/643560604/zip"
+
