@@ -5,12 +5,12 @@ jobs:
   build_and_test:
     runs-on: ubuntu-latest
     steps:
-      #- name: Archive production artifacts
-      #  uses: actions/upload-artifact@v3
-      #  with:
-      #    name: astro-docu
-      #    path: /home/natalia/github.com/workspace/hello-world/_artifact/*
-      - name : List files for the artifact
-        run : |
-          echo workspace: $${{ github.workspace }} 
-          ls -lsr ${{ github.workspace }}  
+      - name: Archive production artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: astro-docu
+          path: ${{ github.workspace }}/_artifact/*
+      #- name : List files for the artifact
+      #  run : |
+      #    echo workspace: ${{ github.workspace }}
+      #    ls ${{ github.workspace }}
