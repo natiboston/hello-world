@@ -36,5 +36,9 @@ jobs:
     needs:   release-artifact
     steps:
       - name: Check files
-        run: wget "https://api.github.com/repos/natiboston/hello-world/actions/artifacts/643560604/zip"
+        run: curl --location --request GET 'https://api.github.com/repos/natiboston/hello-world/actions/artifacts/643560604' \
+--header 'Accept: application/vnd.github+json' \
+--header 'X-GitHub-Api-Version: 2022-11-28' \
+--header 'Cookie: _octo=GH1.1.128020517.1681303272; logged_in=no' \
+  --data-raw ''
 
