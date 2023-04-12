@@ -1,6 +1,12 @@
 name: Upload 1
 run-name: ${{ github.actor }} is testing UPDATE artifact with GitHub Actions
 on: [push]
+
+env:
+  # github.workspace !=   GITHUB_WORKSPACE
+  # github.workspace /home/runner/work/<REPO_NAME>/<REPO_NAME>
+  GITHUB_WORKSPACE: /home/natalia/github.com/workspace/hello-world
+
 jobs:
   build-artifact:
     runs-on: ubuntu-latest
@@ -24,7 +30,7 @@ jobs:
         with :
           name : astro-docu
           #path in case change the output
-          path: output
+          path: $GITHUB_WORKSPACE/output
 
       - name : Check files
-        run: ls -R  output
+        run: ls -R  $GITHUB_WORKSPACE/output
