@@ -5,6 +5,7 @@ on: [push]
 env:
   # github.workspace !=   GITHUB_WORKSPACE
   # github.workspace /home/runner/work/<REPO_NAME>/<REPO_NAME>
+  # github.workspace /home/runner/work/hello-world/hello-world/output
   GITHUB_WORKSPACE: /home/natalia/github.com/workspace/hello-world
 
 jobs:
@@ -30,7 +31,7 @@ jobs:
         with :
           name : astro-docu
           #path in case change the output
-          path: $GITHUB_WORKSPACE/output
+          path: ${{ GITHUB_WORKSPACE }}/output
 
       - name : Check files
-        run: ls -R  $GITHUB_WORKSPACE/output
+        run: ls -R  ${{ GITHUB_WORKSPACE }}/output
