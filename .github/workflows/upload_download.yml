@@ -25,7 +25,7 @@ jobs:
         with :
           name : astro-docu
           #path in case change the output
-          path: $GITHUB_WORKSPACE/output
+          path: output
 
       - name : Check files
         run: ls -R  output
